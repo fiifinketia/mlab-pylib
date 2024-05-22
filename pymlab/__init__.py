@@ -1,3 +1,15 @@
-from __train import train, TrainResults
-from __test import test, TestResults
-from __utils import utils
+from .m_train import (
+    train,
+    TrainResults,
+)
+from .m_test import (
+    test,
+    TestResults,
+)
+
+__all__ = [
+    "train",
+    "TrainResults",
+    "test",
+    "TestResults",
+]
