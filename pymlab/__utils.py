@@ -1,3 +1,6 @@
+import os
+
+
 def parse_list(value):
     # Check if the value is a list
     if value.startswith('[') and value.endswith(']'):
@@ -60,3 +63,8 @@ def fetch_parameters(config_path):
                         parameters[param_name] = str(param_value)
 
     return parameters
+
+def run_in_dir(directory: str, commands: list[str]) -> None:
+    os.chdir(directory)
+    for command in commands:
+        os.system(command)

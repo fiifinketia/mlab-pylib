@@ -6,7 +6,7 @@ import asyncio
 import os
 import json
 import requests
-from __utils import fetch_parameters
+from __utils import fetch_parameters,run_in_dir
 
 class TestResults:
     """Results of testing."""
@@ -52,7 +52,7 @@ def test(model_path: str, result_id: str, trained_model: str, API_URL: str):
             if response.status_code != 200:
                 raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
             
-        asyncio.run(main())
+        run_in_dir(model_path, [f"source {model_path}/venv/bin/activate", f"python -m asyncio.run {main()}"])
 
     except Exception as e:
         # Append error in error.txt file
