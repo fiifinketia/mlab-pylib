@@ -5,7 +5,6 @@ This is the file that will be used to test your model
 import os
 import json
 import requests
-from .utils import fetch_parameters,run_in_dir
 
 class TestResults:
     """Results of testing."""
@@ -14,49 +13,57 @@ class TestResults:
         self.files = files
         self.predictions = predictions
 
-def test(model_path: str, result_id: str, trained_model: str, API_URL: str):
-    parameters = fetch_parameters(config_path=f"{model_path}/config.txt")
-    DATASET_PATH = str(parameters["dataset_url"]).strip() # type: ignore
-
-    test_model = getattr(__import__(f"{model_path}.model", fromlist=["test"]), "test")
-
+async def test(
+    main, # this is the function that will be called to train the model
+    result_id: str,
+    api_url: str,
+    **kwargs, 
+):
+    """
+    Train a model
+    This function will provide the dataset path, parameters and result_id
+    and will return the results of training.
+    """
     try:
+        metrics, files, pretrained_model = await main(result_id=result_id, api_url=api_url, **kwargs)
 
-        # check if trained model exists
-        async def main():
-            if not os.path.exists(trained_model):
-                raise ValueError("Trained model not found")
-            
-            # run test_model asynchronously
-            model: TestResults = await test_model(DATASET_PATH, result_id, trained_model)
-            files = {}
+        model = TestResults(
+            metrics=metrics,
+            files=files,
+            pretrained_model=pretrained_model,
+        )
 
+        files = {}
+
+        for file in model.files:
+            filename = file.split("/")[-1]
+            files[filename] = (filename, open(file, 'rb'))
+
+        # Stringify metrics
+        metrics = json.dumps(model.metrics)
+        data = {
+            "result_id": result_id,
+            "metrics": metrics,
+            "pretrained_model": model.pretrained_model,
+        }
+
+            # files = model.files
+
+        response = requests.post(api_url, data=data, files=files,timeout=120)
+
+        if response.status_code == 200:
+            print("Successfully uploaded results")
             for file in model.files:
-                filename = file.split("/")[-1]
-                read_file = open(file, 'rb')
-                files[filename] = (filename, read_file)
-
-
-            # Stringify metrics
-            metrics = json.dumps(model.metrics)
-            data = {
-                "result_id": result_id,
-                "metrics": metrics,
-                "predictions": model.predictions,
-            }
-
-
-            response = requests.post(API_URL+f"?error={False}", data=data, files=files,timeout=120, verify=False)
-
-            if response.status_code != 200:
-                raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
-            
-        run_in_dir(model_path, [f"source {model_path}/venv/bin/activate", f"python -m asyncio.run {main()}"])
+                os.remove(file)
+        else:
+            print("Error uploading results")
+            # Append error in error.txt file
+            # First check if error.txt file exists
+            raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
 
     except Exception as e:
         # Append error in error.txt file
         # First check if error.txt file exists
-        print("Error: ", e)
         if not os.path.exists(f"{result_id}/error.txt"):
             os.mkdir(result_id)
             with open(f"{result_id}/error.txt", "w", encoding="utf-8") as f:
@@ -68,4 +75,4 @@ def test(model_path: str, result_id: str, trained_model: str, API_URL: str):
         req_files = {
             "error.txt": error_file,
         }
-        requests.post(API_URL+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120)
+        requests.post(api_url+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120)
