@@ -26,10 +26,13 @@ def train(
     DATASET_PATH = str(parameters["dataset_url"]).strip() # type: ignore
 
     train_model = getattr(__import__(f"{model_path}.model", fromlist=["train"]), "train")
+    print(train_model)
 
     try:
         async def main():
+            print("Training model")
             model: TrainResults = train_model(dataset_path=DATASET_PATH, parameters=parameters, result_id=result_id)
+            print(model)
             files = {}
 
             for file in model.files:
@@ -44,12 +47,12 @@ def train(
                 "pretrained_model": model.pretrained_model,
             }
 
-
+            print("Uploading results")
             response = requests.post(API_URL, data=data, files=files,timeout=120, verify=False)
 
             if response.status_code != 200:
                 raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
-
+        print("Running in dir")
         run_in_dir(model_path, [f"source {model_path}/venv/bin/activate", f"python -m asyncio.run {main()}"])
     except Exception as e:
         # Append error in error.txt file

@@ -1,5 +1,5 @@
 import os
-
+import subprocess
 
 def parse_list(value):
     # Check if the value is a list
@@ -67,4 +67,4 @@ def fetch_parameters(config_path):
 def run_in_dir(directory: str, commands: list[str]) -> None:
     os.chdir(directory)
     for command in commands:
-        os.system(command)
+        subprocess.run(command, shell=True, check=True)
