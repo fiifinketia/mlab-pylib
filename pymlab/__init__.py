@@ -1,8 +1,8 @@
-from .m_train import (
+from .train import (
     train,
     TrainResults,
 )
-from .m_test import (
+from .test import (
     test,
     TestResults,
 )
