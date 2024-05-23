@@ -52,11 +52,9 @@ async def test(
         response = requests.post(api_url, data=data, files=files,timeout=120)
 
         if response.status_code == 200:
-            print("Successfully uploaded results")
             for file in model.files:
                 os.remove(file)
         else:
-            print("Error uploading results")
             # Append error in error.txt file
             # First check if error.txt file exists
             raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")

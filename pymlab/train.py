@@ -45,11 +45,9 @@ async def train(
         response = requests.post(api_url, data=data, files=files,timeout=120)
 
         if response.status_code == 200:
-            print("Successfully uploaded results")
             for file in files:
                 os.remove(file)
         else:
-            print("Error uploading results")
             raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
 
     except Exception as e:
