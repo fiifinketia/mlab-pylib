@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "mlab.py"
+version = "1.0.0"
+description = "Python packages for mlab ecosystem"
+authors = ["Kelvin Nketia-Achiampong <disal.bot@gmlcv.onmicrosoft.com>"]
+readme = "README.md"
+packages = [
+    { include = "pymlab", from = "." },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

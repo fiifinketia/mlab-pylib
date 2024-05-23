@@ -1,10 +1,20 @@
-from .m_train import (
+from .train import (
     train,
     TrainResults,
 )
-from .m_test import (
+from .test import (
     test,
     TestResults,
+)
+
+from .main import (
+    load_pkg,
+    load_native_pkg,
+    run_native_pkg,
+)
+
+from .utils import (
+    fetch_parameters,
 )
 
 __all__ = [
@@ -12,4 +22,8 @@ __all__ = [
     "TrainResults",
     "test",
     "TestResults",
+    "load_pkg",
+    "load_native_pkg",
+    "run_native_pkg",
+    "fetch_parameters",
 ]
