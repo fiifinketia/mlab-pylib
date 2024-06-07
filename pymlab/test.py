@@ -4,17 +4,18 @@ This is the file that will be used to test your model
 """
 import os
 import json
+from typing import Callable, Coroutine, Mapping
 import requests
 
 class TestResults:
     """Results of testing."""
-    def __init__(self, metrics: dict[str, float], files: [], predictions: []):
+    def __init__(self, metrics: dict[str, float], files: Mapping[str, bytes | str], predictions: []):
         self.metrics = metrics
         self.files = files
         self.predictions = predictions
 
 async def test(
-    main, # this is the function that will be called to train the model
+    main: Callable[..., Coroutine[None, None, TestResults]],
     result_id: str,
     api_url: str,
     user_token: str,
@@ -26,35 +27,23 @@ async def test(
     and will return the results of training.
     """
     try:
-        metrics, files, pretrained_model = await main(result_id=result_id, **kwargs)
-
-        model = TestResults(
-            metrics=metrics,
-            files=files,
-            pretrained_model=pretrained_model,
-        )
-
-        files = {}
-
-        for file in model.files:
-            filename = file.split("/")[-1]
-            files[filename] = (filename, open(file, 'rb'))
+        test_result = await main(result_id=result_id, **kwargs)
 
         # Stringify metrics
-        metrics = json.dumps(model.metrics)
+        metrics = json.dumps(test_result.metrics)
         data = {
             "result_id": result_id,
             "metrics": metrics,
-            "pretrained_model": model.pretrained_model,
+            "predictions": test_result.predictions,
+            "pkg_name": "pymlab.test",
         }
 
-            # files = model.files
-
-        response = requests.post(api_url, data=data, files=files,timeout=120, verify=False, headers={"Authorization":user_token})
+        response = requests.post(api_url, data=data, files=test_result.files,timeout=120, verify=False, headers={"Authorization":user_token})
 
         if response.status_code == 200:
-            for file in model.files:
-                os.remove(file)
+            # delete files
+            for file in test_result.files.items():
+                os.remove(file[0])
         else:
             # Append error in error.txt file
             # First check if error.txt file exists

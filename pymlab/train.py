@@ -5,50 +5,48 @@ This is the file that will be used to train your model
 import os
 import json
 import requests
+from typing import Callable, Coroutine, Mapping
 
 class TrainResults:
     """Results of training."""
-    def __init__(self, pretrained_model: str, metrics: dict[str, float], files: []):
+    # Files is an array of files from open() function
+    def __init__(self, pretrained_model: str, metrics: dict[str, float], files: Mapping[str, bytes | str]):
         self.pretrained_model = pretrained_model
         self.metrics = metrics
         self.files = files
 
 
 async def train(
-    main, # this is the function that will be called to train the model
+    # This main function is an async function that returns TrainResults type
+    main: Callable[..., Coroutine[None, None, TrainResults]],
     result_id: str,
     api_url: str,
     user_token: str,
     **kwargs,
-) -> TrainResults:
+) -> None:
     """
     Train a model
     This function will provide the dataset path, parameters and result_id
     and will return the results of training.
     """
-    x_api_key = os.environ.get("X_API_KEY")
     try:
-        metrics, files, pretrained_model = await main(result_id=result_id, **kwargs)
-
-        files = {}
-
-        for file in files:
-            filename = file.split("/")[-1]
-            files[filename] = (filename, open(file, 'rb'))
+        train_results = await main(result_id=result_id, **kwargs)
 
         # Stringify metrics
-        metrics = json.dumps(metrics)
+        metrics = json.dumps(train_results.metrics)
         data = {
             "result_id": result_id,
             "metrics": metrics,
-            "pretrained_model": pretrained_model,
+            "pretrained_model": train_results.pretrained_model,
+            "pkg_name": "pymlab.train",
         }
 
-        response = requests.post(api_url, data=data, files=files,timeout=120, verify=False, headers={"Authorization":user_token})
+        response = requests.post(api_url, data=data, files=train_results.files,timeout=120, verify=False, headers={"Authorization":user_token})
 
         if response.status_code == 200:
-            for file in files:
-                os.remove(file)
+            # delete files
+            for file in train_results.files.items():
+                os.remove(file[0])
         else:
             raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
 
@@ -60,7 +58,8 @@ async def train(
         else:
             with open(f"{result_id}/error.txt", "a", encoding="utf-8") as f:
                 f.write(str(e))
-        error_file = open(f"{result_id}/error.txt", "rb")
+        with open(f"{result_id}/error.txt", "rb") as f:
+            error_file = f.read()
         req_files = {
             "error.txt": error_file,
         }
