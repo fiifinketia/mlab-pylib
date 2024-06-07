@@ -41,7 +41,7 @@ async def train(
             "pkg_name": "pymlab.train",
         }
 
-        response = requests.post(api_url, data=data, files=train_results.files,timeout=120, verify=False, headers={"Authorization":user_token})
+        response = requests.post(api_url, data=data, files=train_results.files,timeout=120, verify=False, headers={"Authorization":f"Bearer {user_token}"})
 
         if response.status_code == 200:
             # delete files
@@ -63,4 +63,4 @@ async def train(
         req_files = {
             "error.txt": error_file,
         }
-        requests.post(api_url+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120, verify=False, headers={"Authorization":user_token})
+        requests.post(api_url+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120, verify=False, headers={"Authorization":f"Bearer {user_token}"})

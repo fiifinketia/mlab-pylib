@@ -40,7 +40,7 @@ def run_native_pkg(
     result_id: uuid.UUID,
     api_url: str,
     user_token: str,
-    trained_model: str=None,
+    trained_model: str | None = None,
 ) -> subprocess.CompletedProcess[bytes]:
     """Run a script in a virtual environment using ProcessPoolExecutor"""
     # Activate the virtual environment
