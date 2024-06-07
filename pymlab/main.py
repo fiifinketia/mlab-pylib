@@ -10,7 +10,6 @@ def load_pkg(
     p_type: str,
     name: str,
     to: str,
-    code: str | None = None,
 ):
     if p_type == 'native':
         load_native_pkg(name, to)

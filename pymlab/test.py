@@ -25,7 +25,7 @@ async def test(
     and will return the results of training.
     """
     try:
-        metrics, files, pretrained_model = await main(result_id=result_id, api_url=api_url, **kwargs)
+        metrics, files, pretrained_model = await main(result_id=result_id, **kwargs)
 
         model = TestResults(
             metrics=metrics,
