@@ -39,6 +39,7 @@ def run_native_pkg(
     at: str,
     result_id: uuid.UUID,
     api_url: str,
+    user_token: str,
     trained_model: str=None,
 ) -> subprocess.CompletedProcess[bytes]:
     """Run a script in a virtual environment using ProcessPoolExecutor"""
@@ -49,7 +50,7 @@ def run_native_pkg(
     # Prepare the command to run the script with arguments
     script_path = f"{at}/main.py"
     config_path = f"{at}/config.txt"
-    run_script = f"python {script_path} --config {config_path} --result_id {result_id} --trained_model {trained_model} --api_url {api_url} --pkg_name {name}"
+    run_script = f"python {script_path} --config {config_path} --result_id {result_id} --trained_model {trained_model} --api_url {api_url} --pkg_name {name} --user_token {user_token}"
 
     # Combine the commands
     command = f"{activate_venv} && {run_script}"

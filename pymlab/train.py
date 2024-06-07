@@ -18,6 +18,7 @@ async def train(
     main, # this is the function that will be called to train the model
     result_id: str,
     api_url: str,
+    user_token: str,
     **kwargs,
 ) -> TrainResults:
     """
@@ -43,7 +44,7 @@ async def train(
             "pretrained_model": pretrained_model,
         }
 
-        response = requests.post(api_url, data=data, files=files,timeout=120, headers={"X-API-KEY": x_api_key}, verify=False)
+        response = requests.post(api_url, data=data, files=files,timeout=120, verify=False, headers={"Authorization":user_token})
 
         if response.status_code == 200:
             for file in files:
@@ -63,4 +64,4 @@ async def train(
         req_files = {
             "error.txt": error_file,
         }
-        requests.post(api_url+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120, headers={"X-API-KEY": x_api_key}, verify=False)
+        requests.post(api_url+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120, verify=False, headers={"Authorization":user_token})
