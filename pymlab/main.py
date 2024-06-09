@@ -53,10 +53,10 @@ def run_native_pkg(
     script_path = f"{at}/main.py"
     config_path = f"{at}/config.txt"
     run_script = f"python {script_path} --config {config_path} --result_id {result_id} --trained_model {trained_model} --api_url {api_url} --pkg_name {name} --user_token {user_token}"
-    stderr_file = make_file(str(result_id), "stderr.log")
-    stdout_file = make_file(str(result_id), "stdout.log")
+    # stderr_file = make_file(str(result_id), "stderr.log")
+    # stdout_file = make_file(str(result_id), "stdout.log")
     # Combine the commands
     command = f"{activate_venv} && {run_script}"
 
     # Run the command
-    return subprocess.run(command, shell=True, executable="/bin/bash", check=True, stderr=stderr_file, stdout=stdout_file)
+    return subprocess.run(command, shell=True, executable="/bin/bash", check=True)
