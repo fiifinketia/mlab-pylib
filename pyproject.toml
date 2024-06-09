@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mlab.py"
-version = "1.0.9"
+version = "1.0.11"
 description = "Python packages for mlab ecosystem"
 authors = ["Kelvin Nketia-Achiampong <disal.bot@gmlcv.onmicrosoft.com>"]
 readme = "README.md"

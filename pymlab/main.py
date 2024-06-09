@@ -43,7 +43,7 @@ def run_native_pkg(
     api_url: str,
     user_token: str,
     trained_model: str | None = None,
-) -> subprocess.CompletedProcess[bytes]:
+) -> subprocess.Popen[bytes]:
     """Run a script in a virtual environment using ProcessPoolExecutor"""
     # Activate the virtual environment
     venv_path = f"{at}/venv"
@@ -58,6 +58,11 @@ def run_native_pkg(
     # Combine the commands
     command = f"{activate_venv} && {run_script}"
 
-    # Run the command
-    with open(stderr_file_path, "w") as stderr_file, open(stdout_file_path, "w") as stdout_file:
-        return subprocess.run(command, shell=True, executable="/bin/bash", check=True, stderr=stderr_file, stdout=stdout_file)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, executable="/bin/bash")
+    if process.stdout is not None and process.stderr is not None:
+        with process.stdout as stdout, process.stderr as stderr:
+            stderr_file = open(stderr_file_path, "wb")
+            stdout_file = open(stdout_file_path, "wb")
+            stderr_file.write(stderr.read())
+            stdout_file.write(stdout.read())
+    return process
