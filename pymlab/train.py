@@ -7,7 +7,7 @@ import json
 import requests
 from typing import Callable, Coroutine, Mapping
 
-from . import make_file, clean_files
+from .utils import make_file, clean_files
 
 class TrainResults:
     """Results of training."""
