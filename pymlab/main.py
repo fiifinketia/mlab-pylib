@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import uuid
 
-from pymlab.utils import make_file
+from .utils import make_file
 
 
 NATIVE_PACKAGES = ['pymlab.test', 'pymlab.train']
