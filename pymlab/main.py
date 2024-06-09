@@ -42,18 +42,19 @@ def run_native_pkg(
     result_id: uuid.UUID,
     api_url: str,
     user_token: str,
+    venv_name: str,
     trained_model: str | None = None,
 ) -> subprocess.Popen[bytes]:
     """Run a script in a virtual environment using ProcessPoolExecutor"""
     # Activate the virtual environment
     venv_path = f"{at}/venv"
-    activate_venv = f"source {venv_path}/bin/activate"
+    activate_venv = f"conda {venv_name}"
 
     # Prepare the command to run the script with arguments
     script_path = f"{at}/main.py"
     config_path = f"{at}/config.txt"
-    stderr_file_path = f"{at}/{make_file(str(result_id), "stderr.log")}"
-    stdout_file_path = f"{at}/{make_file(str(result_id), "stdout.log")}"
+    stderr_file_path = f"{at}/{make_file(str(result_id), 'stderr.log')}"
+    stdout_file_path = f"{at}/{make_file(str(result_id), 'stdout.log')}"
     run_script = f"python {script_path} --config {config_path} --result_id {result_id} --trained_model {trained_model} --api_url {api_url} --pkg_name {name} --user_token {user_token}"
     # Combine the commands
     command = f"{activate_venv} && {run_script}"
