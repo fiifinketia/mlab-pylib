@@ -15,6 +15,8 @@ from .main import (
 
 from .utils import (
     fetch_parameters,
+    make_file,
+    clean_files,
 )
 
 __all__ = [
@@ -26,4 +28,6 @@ __all__ = [
     "load_native_pkg",
     "run_native_pkg",
     "fetch_parameters",
+    "make_file",
+    "clean_files",
 ]

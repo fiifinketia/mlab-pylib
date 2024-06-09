@@ -7,6 +7,8 @@ import json
 from typing import Callable, Coroutine, Mapping
 import requests
 
+from . import make_file, clean_files
+
 class TestResults:
     """Results of testing."""
     def __init__(self, metrics: dict[str, float], files: Mapping[str, bytes | str], predictions: []):
@@ -42,8 +44,7 @@ async def test(
 
         if response.status_code == 200:
             # delete files
-            for file in test_result.files.items():
-                os.remove(file[0])
+            clean_files(result_id)
         else:
             # Append error in error.txt file
             # First check if error.txt file exists
@@ -52,14 +53,9 @@ async def test(
     except Exception as e:
         # Append error in error.txt file
         # First check if error.txt file exists
-        if not os.path.exists(f"{result_id}/error.txt"):
-            os.mkdir(result_id)
-            with open(f"{result_id}/error.txt", "w", encoding="utf-8") as f:
-                f.write(str(e))
-        else:
-            with open(f"{result_id}/error.txt", "a", encoding="utf-8") as f:
-                f.write(str(e))
-        error_file = open(f"{result_id}/error.txt", "rb")
+        file_path = make_file(result_id, "error.txt", str(e))
+        with open(file_path, "rb") as f:
+            error_file = f.read()
         req_files = {
             "error.txt": error_file,
         }

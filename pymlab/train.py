@@ -7,6 +7,8 @@ import json
 import requests
 from typing import Callable, Coroutine, Mapping
 
+from . import make_file, clean_files
+
 class TrainResults:
     """Results of training."""
     # Files is an array of files from open() function
@@ -45,20 +47,13 @@ async def train(
 
         if response.status_code == 200:
             # delete files
-            for file in train_results.files.items():
-                os.remove(file[0])
+            clean_files(result_id)
         else:
             raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
 
     except Exception as e:
-        if not os.path.exists(f"{result_id}/error.txt"):
-            os.mkdir(result_id)
-            with open(f"{result_id}/error.txt", "w", encoding="utf-8") as f:
-                f.write(str(e))
-        else:
-            with open(f"{result_id}/error.txt", "a", encoding="utf-8") as f:
-                f.write(str(e))
-        with open(f"{result_id}/error.txt", "rb") as f:
+        file_path = make_file(result_id, "error.txt", str(e))
+        with open(file_path, "rb") as f:
             error_file = f.read()
         req_files = {
             "error.txt": error_file,

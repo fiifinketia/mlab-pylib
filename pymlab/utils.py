@@ -68,3 +68,25 @@ def run_in_dir(directory: str, commands: list[str]) -> None:
     os.chdir(directory)
     for command in commands:
         subprocess.run(command, shell=True, check=True)
+
+
+def make_file(result_id: str, file_name: str, content: str | None = None):
+    """Create a file with the given content."""
+    file_path = f"results/{result_id}/{file_name}"
+    if not os.path.exists(f"results/{result_id}"):
+        os.makedirs(f"results/{result_id}")
+    with open(file_path, "w") as f:
+        if content is not None:
+            f.write(content)
+        else :
+            f.write("")
+    return file_path
+
+def clean_files(result_id: str):
+    """Remove all files in the result directory."""
+    result_dir = f"results/{result_id}"
+    if not os.path.exists(result_dir):
+        return
+    for file_name in os.listdir(result_dir):
+        file_path = os.path.join(result_dir, file_name)
+        os.remove(file_path)
