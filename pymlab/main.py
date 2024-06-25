@@ -42,28 +42,31 @@ def run_native_pkg(
     result_id: uuid.UUID,
     api_url: str,
     user_token: str,
-    venv_name: str,
+    venv_name: str | None =  None,
     trained_model: str | None = None,
 ) -> subprocess.Popen[bytes]:
     """Run a script in a virtual environment using ProcessPoolExecutor"""
     # Activate the virtual environment
-    venv_path = f"{at}/venv"
-    activate_venv = f"conda {venv_name}"
+    # venv_path = f"{at}/venv"
+    # activate_venv = f"conda {venv_name}"
 
     # Prepare the command to run the script with arguments
-    script_path = f"{at}/main.py"
+    # script_path = f"{at}/main.py"
     config_path = f"{at}/config.txt"
+    os.chdir(at)
     stderr_file_path = f"{at}/{make_file(str(result_id), 'stderr.log')}"
     stdout_file_path = f"{at}/{make_file(str(result_id), 'stdout.log')}"
-    run_script = f"python {script_path} --config {config_path} --result_id {result_id} --trained_model {trained_model} --api_url {api_url} --pkg_name {name} --user_token {user_token}"
+    run_script = f"cog train -i config={config_path} -i result_id={result_id} -i api_url={api_url} -i pkg_name={name} -i user_token={user_token}"
+    if trained_model is not None:
+        run_script += f" -i trained_model={trained_model}"
+    print(run_script)
     # Combine the commands
-    command = f"{activate_venv} && {run_script}"
 
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, executable="/bin/bash")
-    if process.stdout is not None and process.stderr is not None:
-        with process.stdout as stdout, process.stderr as stderr:
-            stderr_file = open(stderr_file_path, "wb")
-            stdout_file = open(stdout_file_path, "wb")
-            stderr_file.write(stderr.read())
-            stdout_file.write(stdout.read())
-    return process
+    with subprocess.Popen(run_script, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, executable="/bin/bash", cwd=at) as process:
+        if process.stdout is not None and process.stderr is not None:
+            with process.stdout as stdout, process.stderr as stderr:
+                stderr_file = open(stderr_file_path, "wb")
+                stdout_file = open(stdout_file_path, "wb")
+                stderr_file.write(stderr.read())
+                stdout_file.write(stdout.read())
+        return process

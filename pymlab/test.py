@@ -33,10 +33,11 @@ async def test(
 
         # Stringify metrics
         metrics = json.dumps(test_result.metrics)
+        predictions = json.dumps(test_result.predictions)
         data = {
             "result_id": result_id,
             "metrics": metrics,
-            "predictions": test_result.predictions,
+            "predictions": predictions,
             "pkg_name": "pymlab.test",
         }
 
@@ -46,13 +47,9 @@ async def test(
             # delete files
             clean_files(result_id)
         else:
-            # Append error in error.txt file
-            # First check if error.txt file exists
             raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
 
     except Exception as e:
-        # Append error in error.txt file
-        # First check if error.txt file exists
         file_path = make_file(result_id, "error.txt", str(e))
         with open(file_path, "rb") as f:
             error_file = f.read()
