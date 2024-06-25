@@ -33,10 +33,13 @@ async def test(
 
         # Stringify metrics
         metrics = json.dumps(test_result.metrics)
+        predictions = str(test_result.predictions)
+        print(predictions)
+        print(list(predictions))
         data = {
             "result_id": result_id,
             "metrics": metrics,
-            "predictions": test_result.predictions,
+            "predictions": predictions,
             "pkg_name": "pymlab.test",
         }
 
