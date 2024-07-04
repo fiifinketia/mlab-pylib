@@ -81,7 +81,6 @@ def make_file(file_name: str, content: str | None = None, at: str = "") -> str:
         file_path = f"{at}/{file_name}"
         if not os.path.exists(at):
             os.makedirs(at)
-    print(file_path)
     with open(file_path, "wb") as f:
         if content is not None:
             f.write(content.encode())
@@ -117,6 +116,5 @@ class BytesEncoder(json.JSONEncoder):
 def save_results(at: str, data):
     """Save results to a file."""
     file_path = make_file(file_name="result.json", at=at)
-    print(file_path)
     with open(file_path, "w") as f:
         json.dump(data, f, cls=BytesEncoder)

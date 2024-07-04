@@ -5,14 +5,14 @@ This is the file that will be used to train your model
 import os
 import json
 import requests
-from typing import Callable, Coroutine, Mapping
+from typing import Any, Callable, Coroutine, Mapping
 
 from .utils import make_file, clean_files, save_results
 
 class TrainResults:
     """Results of training."""
     # Files is an array of files from open() function
-    def __init__(self, pretrained_model: str, metrics: dict[str, float], files: Mapping[str, bytes | str]):
+    def __init__(self, pretrained_model: str, metrics: dict[str, Any], files: Mapping[str, bytes | str]):
         self.pretrained_model = pretrained_model
         self.metrics = metrics
         self.files = files
@@ -33,7 +33,7 @@ async def train(
         train_results = await main(task_id=task_id, **kwargs)
 
         # Stringify metrics
-        metrics = json.dumps(train_results.metrics)
+        metrics = train_results.metrics
         data = {
             "task_id": task_id,
             "metrics": metrics,
@@ -41,7 +41,6 @@ async def train(
             "pkg_name": "pymlab.train",
             "files": train_results.files,
         }
-        print(data)
 
         save_results("success", data)
 
@@ -58,5 +57,5 @@ async def train(
         req_files = {
             "error.txt": error_file,
         }
-        data={"task_id": task_id, "error": str(e), "files": req_files}
+        data={"task_id": task_id, "error": str(e), "files": req_files, "pkg_name": "pymlab.train"}
         save_results("error", data)
