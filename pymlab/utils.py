@@ -115,7 +115,7 @@ class BytesEncoder(json.JSONEncoder):
             return super().default(o)
 def save_results(at: str, data):
     """Save results to a file."""
-    loc = Path(f"{at}/result.json")
-    make_file(file_name="result.json", at=at)
-    with open(loc, "w") as f:
+    file_path = make_file(file_name="result.json", at=at)
+    print(file_path)
+    with open(file_path, "w") as f:
         json.dump(data, f, cls=BytesEncoder)
