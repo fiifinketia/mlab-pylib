@@ -22,8 +22,6 @@ async def train(
     # This main function is an async function that returns TrainResults type
     main: Callable[..., Coroutine[None, None, TrainResults]],
     task_id: str,
-    api_url: str,
-    user_token: str,
     **kwargs,
 ) -> None:
     """

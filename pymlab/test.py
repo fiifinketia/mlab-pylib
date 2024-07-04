@@ -19,8 +19,6 @@ class TestResults:
 async def test(
     main: Callable[..., Coroutine[None, None, TestResults]],
     task_id: str,
-    api_url: str,
-    user_token: str,
     **kwargs, 
 ):
     """
