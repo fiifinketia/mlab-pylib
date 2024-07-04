@@ -1,4 +1,7 @@
+import base64
+import json
 import os
+from pathlib import Path
 import subprocess
 
 def parse_list(value):
@@ -70,16 +73,19 @@ def run_in_dir(directory: str, commands: list[str]) -> None:
         subprocess.run(command, shell=True, check=True)
 
 
-def make_file(result_id: str, file_name: str, content: str | None = None):
+def make_file(task_id: str, file_name: str, content: str | None = None, at: str = "") -> str:
     """Create a file with the given content."""
-    file_path = f"results/{result_id}/{file_name}"
-    if not os.path.exists(f"results/{result_id}"):
-        os.makedirs(f"results/{result_id}")
-    with open(file_path, "w") as f:
+    if at == "":
+        file_path = f"results/{file_name}"
+    else:
+        file_path = f"{at}/results/{file_name}"
+    if not os.path.exists(f"results"):
+        os.makedirs(f"results")
+    with open(file_path, "wb") as f:
         if content is not None:
-            f.write(content)
+            f.write(content.encode())
         else :
-            f.write("")
+            f.write(b"")
     return file_path
 
 def clean_files(result_id: str):
@@ -90,3 +96,25 @@ def clean_files(result_id: str):
     for file_name in os.listdir(result_dir):
         file_path = os.path.join(result_dir, file_name)
         os.remove(file_path)
+
+class BytesEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, bytes):
+            return base64.b64encode(o).decode("ascii")
+        # if instance of array of encoded files
+        elif isinstance(o, list) and all(isinstance(item, bytes) for item in o):
+            return [base64.b64encode(item).decode("ascii") for item in o]
+        # if instance of dict with encoded files
+        elif isinstance(o, dict) and all(isinstance(value, bytes) for value in o.values()):
+            return {key: base64.b64encode(value).decode("ascii") for key, value in o.items()}
+        # if instance of dict with arrays of encoded files
+        elif isinstance(o, dict) and all(isinstance(value, list) and all(isinstance(item, bytes) for item in sublist) for value in o.values()):
+            return {key: [base64.b64encode(item).decode("ascii") for item in sublist] for key, sublist in o.items()}
+        # if instance of dict with
+        else:
+            return super().default(o)
+def save_results(at: str, data):
+    """Save results to a file."""
+    loc = Path(f"{at}/result.json")
+    with open(loc, "w") as f:
+        json.dump(data, f, cls=BytesEncoder)

@@ -7,7 +7,7 @@ import json
 from typing import Callable, Coroutine, Mapping
 import requests
 
-from .utils import make_file, clean_files
+from .utils import make_file, clean_files, save_results
 
 class TestResults:
     """Results of testing."""
@@ -18,44 +18,35 @@ class TestResults:
 
 async def test(
     main: Callable[..., Coroutine[None, None, TestResults]],
-    result_id: str,
+    task_id: str,
     api_url: str,
     user_token: str,
     **kwargs, 
 ):
     """
     Train a model
-    This function will provide the dataset path, parameters and result_id
+    This function will provide the dataset path, parameters and task_id
     and will return the results of training.
     """
     try:
-        test_result = await main(result_id=result_id, **kwargs)
+        test_result = await main(task_id=task_id, **kwargs)
 
         # Stringify metrics
         metrics = json.dumps(test_result.metrics)
-        predictions = str(test_result.predictions)
-        print(predictions)
-        print(list(predictions))
         data = {
-            "result_id": result_id,
+            "task_id": task_id,
             "metrics": metrics,
-            "predictions": predictions,
+            "predictions": test_result.predictions,
             "pkg_name": "pymlab.test",
+            "files": test_result.files,
         }
-
-        response = requests.post(api_url, data=data, files=test_result.files,timeout=120, verify=False, headers={"Authorization":f"Bearer {user_token}"})
-
-        if response.status_code == 200:
-            # delete files
-            clean_files(result_id)
-        else:
-            raise requests.HTTPError(f"Error uploading results. Status code: {response.status_code}, error: {response.text}")
-
+        save_results("success", data)        
     except Exception as e:
-        file_path = make_file(result_id, "error.txt", str(e))
+        file_path = make_file(task_id, "error.txt", str(e))
         with open(file_path, "rb") as f:
             error_file = f.read()
         req_files = {
             "error.txt": error_file,
         }
-        requests.post(api_url+f"?error={True}", data={"result_id": result_id, "error": str(e)}, files=req_files, timeout=120, verify=False, headers={"Authorization":f"Bearer {user_token}"})
+        data={"task_id": task_id, "error": str(e), "files": req_files}
+        save_results("error", data)
