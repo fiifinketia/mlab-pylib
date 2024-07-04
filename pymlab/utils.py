@@ -73,14 +73,14 @@ def run_in_dir(directory: str, commands: list[str]) -> None:
         subprocess.run(command, shell=True, check=True)
 
 
-def make_file(task_id: str, file_name: str, content: str | None = None, at: str = "") -> str:
+def make_file(file_name: str, content: str | None = None, at: str = "") -> str:
     """Create a file with the given content."""
     if at == "":
-        file_path = f"results/{file_name}"
+        file_path = f"{file_name}"
     else:
-        file_path = f"{at}/results/{file_name}"
-    if not os.path.exists(f"results"):
-        os.makedirs(f"results")
+        file_path = f"{at}/{file_name}"
+    if not os.path.exists(at):
+        os.makedirs(at)
     with open(file_path, "wb") as f:
         if content is not None:
             f.write(content.encode())
@@ -116,5 +116,6 @@ class BytesEncoder(json.JSONEncoder):
 def save_results(at: str, data):
     """Save results to a file."""
     loc = Path(f"{at}/result.json")
+    make_file(file_name="result.json", at=at)
     with open(loc, "w") as f:
         json.dump(data, f, cls=BytesEncoder)
