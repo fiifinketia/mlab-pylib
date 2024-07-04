@@ -79,8 +79,9 @@ def make_file(file_name: str, content: str | None = None, at: str = "") -> str:
         file_path = f"{file_name}"
     else:
         file_path = f"{at}/{file_name}"
-    if not os.path.exists(at):
-        os.makedirs(at)
+        if not os.path.exists(at):
+            os.makedirs(at)
+    print(file_path)
     with open(file_path, "wb") as f:
         if content is not None:
             f.write(content.encode())

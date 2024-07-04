@@ -41,6 +41,7 @@ async def train(
             "pkg_name": "pymlab.train",
             "files": train_results.files,
         }
+        print(data)
 
         save_results("success", data)
 
