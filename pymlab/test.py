@@ -48,3 +48,5 @@ async def test(
         }
         data={"task_id": task_id, "error": str(e), "files": req_files}
         save_results("error", data)
+    finally:
+        clean_files(task_id)
